@@ -1,5 +1,8 @@
 const express = require('express');
 const path = require('path');
+const cors = require('cors');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./swagger');
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -8,12 +11,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Configuração de CORS
-app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-    next();
-});
+app.use(cors());
+
+// Documentação Swagger
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Importar rotas
 const routes = require('./routes');
