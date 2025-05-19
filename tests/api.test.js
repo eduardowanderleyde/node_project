@@ -6,9 +6,9 @@ describe('API de Portfólio', () => {
     test('GET /api - deve retornar informações da API', async () => {
         const response = await request(app).get('/api');
         expect(response.status).toBe(200);
-        expect(response.body).toHaveProperty('message');
-        expect(response.body).toHaveProperty('status');
-        expect(response.body).toHaveProperty('version');
+        expect(response.body).toHaveProperty('nome');
+        expect(response.body).toHaveProperty('versao');
+        expect(response.body).toHaveProperty('descricao');
     });
 
     // Teste da rota de projetos
