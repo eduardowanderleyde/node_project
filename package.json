@@ -4,8 +4,8 @@
   "description": "API de Portfólio Pessoal desenvolvida com Node.js",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js",
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
     "test": "jest",
     "test:coverage": "jest --coverage"
   },
@@ -20,11 +20,12 @@
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
-    "express": "^4.18.2",
+    "express": "^4.21.2",
     "helmet": "^7.1.0",
     "morgan": "^1.10.0",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "jest": "^29.7.0",
@@ -40,6 +41,16 @@
         "statements": 75
       }
     }
-  }
-  
+  },
+  "directories": {
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eduardowanderleyde/node_project.git"
+  },
+  "bugs": {
+    "url": "https://github.com/eduardowanderleyde/node_project/issues"
+  },
+  "homepage": "https://github.com/eduardowanderleyde/node_project#readme"
 }

@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
-const projectRoutes = require('./src/routes/projectRoutes');
-const logger = require('./middlewares/logger.js');
+const projectRoutes = require('./routes/projectRoutes.js');
+const logger = require('./middlewares/logger');
 
 // Middleware
 app.use(express.json());
