@@ -2,7 +2,7 @@
   "name": "node_project",
   "version": "1.0.0",
   "description": "API de Portfólio Pessoal desenvolvida com Node.js",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
