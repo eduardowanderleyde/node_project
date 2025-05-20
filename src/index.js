@@ -1,14 +1,24 @@
+require('dotenv').config();
+const connectDB = require('./config/db');
+connectDB();
+
 const express = require('express');
 const app = express();
 const projectRoutes = require('./routes/projectRoutes.js');
+const authRoutes = require('./routes/authRoutes');
 const logger = require('./middlewares/logger');
 
-// Middleware
 app.use(express.json());
-app.use(logger); // Logs all requests
+app.use(logger);
 
-// Routes
+
+app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
+
+// Default route
+app.get('/', (req, res) => {
+  res.send('API Portfolio is running');
+});
 
 // Health check
 app.get('/health', (req, res) => {
