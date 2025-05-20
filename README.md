@@ -1,78 +1,84 @@
-# API de Portfólio Pessoal
+# Personal Portfolio API
 
-Este é um projeto de API REST para portfólio pessoal desenvolvido com Node.js e Express.
+This is a REST API project for a personal portfolio developed with Node.js and Express.
 
-## Tecnologias Utilizadas
+## Technologies Used
 
 - Node.js
 - Express
-- Jest (para testes)
-- Supertest (para testes de API)
-- Morgan (para logging)
-- Helmet (para segurança)
-- CORS (para controle de acesso)
+- Jest (for testing)
+- Supertest (for API testing)
+- Morgan (for logging)
+- Helmet (for security)
+- CORS (for access control)
 
-## Instalação
+## Installation
 
-1. Clone o repositório
+1. Clone the repository
 
 ```bash
 git clone https://github.com/eduardowanderleyde/node_project.git
 ```
 
-2. Instale as dependências
+2. Install dependencies
 
 ```bash
 npm install
 ```
 
-3. Configure as variáveis de ambiente
+3. Configure environment variables
 
 ```bash
 cp .env.example .env
 ```
 
-4. Execute o projeto
+Edite o arquivo `.env` com a string de conexão do seu MongoDB local ou remoto:
+
+```
+MONGODB_URI=mongodb://localhost:27017/portfolio
+NODE_ENV=development
+```
+
+> **Atenção:**
+>
+> - Certifique-se de que o MongoDB está rodando localmente na porta padrão (27017) ou ajuste a URI conforme necessário.
+> - Para rodar os testes, recomenda-se usar um banco de dados separado, por exemplo:
+>   `MONGODB_URI=mongodb://localhost:27017/portfolio_test`
+
+4. Run the project
 
 ```bash
-# Desenvolvimento
+# Development
 npm run dev
 
-# Produção
+# Production
 npm start
 ```
 
-## Endpoints da API
+## API Endpoints
 
-### GET /
+- `GET /` - Returns a welcome message.
+- `GET /health` - Returns `{ status: "ok" }` to indicate the API is running.
 
-- Retorna informações básicas da API
+## Running Tests
 
-### GET /api/projetos
-
-- Retorna lista de projetos
-
-### GET /api/habilidades
-
-- Retorna lista de habilidades
-
-### GET /health
-
-- Verifica o status da API
-
-## Estrutura do Projeto
-
-- `/routes` - Rotas da API
-- `/controllers` - Controladores da aplicação
-- `/middlewares` - Middlewares personalizados
-- `/tests` - Testes automatizados
-
-## Testes
+To run all tests:
 
 ```bash
 npm test
 ```
 
-## Licença
+To run a specific test file:
+
+```bash
+npx jest src/tests/health.test.js
+```
+
+## Project Structure
+
+- `/src` - Main source code (routes, controllers, models, middlewares, config)
+- `/tests` or `/src/tests` - Automated tests
+
+## License
 
 ISC

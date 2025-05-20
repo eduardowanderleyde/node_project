@@ -1,39 +1,38 @@
 const request = require('supertest');
-const app = require('../index');
+const app = require('../src/app');
 
+// Portfolio API test suite
 describe('API de Portfólio', () => {
-    // Teste da rota principal
-    test('GET /api - deve retornar informações da API', async () => {
-        const response = await request(app).get('/api');
-        expect(response.status).toBe(200);
-        expect(response.body).toHaveProperty('nome');
-        expect(response.body).toHaveProperty('versao');
-        expect(response.body).toHaveProperty('descricao');
+    // Test main route
+    it('deve retornar mensagem de boas-vindas', async () => {
+        const res = await request(app).get('/');
+        expect(res.status).toBe(200);
+        expect(res.text).toBe('API Portfolio is running');
     });
 
-    // Teste da rota de projetos
-    test('GET /api/projetos - deve retornar lista de projetos', async () => {
-        const response = await request(app).get('/api/projetos');
-        expect(response.status).toBe(200);
-        expect(response.body).toHaveProperty('projetos');
-        expect(Array.isArray(response.body.projetos)).toBe(true);
-        expect(response.body.projetos.length).toBeGreaterThan(0);
+    // Test health route
+    it('deve retornar status ok', async () => {
+        const res = await request(app).get('/health');
+        expect(res.status).toBe(200);
+        expect(res.body).toHaveProperty('status', 'ok');
     });
 
-    // Teste da rota de habilidades
-    test('GET /api/habilidades - deve retornar lista de habilidades', async () => {
-        const response = await request(app).get('/api/habilidades');
-        expect(response.status).toBe(200);
-        expect(response.body).toHaveProperty('habilidades');
-        expect(Array.isArray(response.body.habilidades)).toBe(true);
-        expect(response.body.habilidades.length).toBeGreaterThan(0);
-    });
+    // Test projects route
+    it('deve retornar lista de projetos', async () => {
+        const res = await request(app).get('/api/projects');
+        expect(res.status).toBe(200);
+        expect(Array.isArray(res.body)).toBe(true);
+    }, 20000);
 
-    // Teste da rota de health check
-    test('GET /health - deve retornar status da API', async () => {
-        const response = await request(app).get('/health');
-        expect(response.status).toBe(200);
-        expect(response.body).toHaveProperty('status');
-        expect(response.body).toHaveProperty('timestamp');
-    });
+    // Test skills route
+    it('deve retornar lista de habilidades', async () => {
+        const res = await request(app).get('/api/skills');
+        expect(res.status).toBe(200);
+        expect(Array.isArray(res.body)).toBe(true);
+    }, 20000);
+}); 
+
+afterAll(async () => {
+  const mongoose = require('mongoose');
+  await mongoose.connection.close();
 }); 
