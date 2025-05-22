@@ -3,10 +3,14 @@ const router = express.Router();
 const controller = require('../controllers/projectController'); // 1 nível só
 const auth = require('../middlewares/auth');
 const adminAuth = require('../middlewares/adminAuth');
+const cache = require('../middlewares/cache');
+
+// Cache duration in seconds
+const CACHE_DURATION = 300; // 5 minutes
 
 // RESTful routes for projects
-router.get('/', controller.index);
-router.get('/:id', controller.show);
+router.get('/', cache(CACHE_DURATION), controller.index);
+router.get('/:id', cache(CACHE_DURATION), controller.show);
 
 
 router.post('/', controller.create);
