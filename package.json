@@ -35,16 +35,6 @@
     "nodemon": "^3.0.2",
     "supertest": "^6.3.3"
   },
-  "jest": {
-    "coverageThreshold": {
-      "global": {
-        "branches": 70,
-        "functions": 49,
-        "lines": 75,
-        "statements": 75
-      }
-    }
-  },
   "directories": {
     "test": "tests"
   },

@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">18.18% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>2/11</span>
+                <span class='fraction'>11/11</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/4</span>
+                <span class='fraction'>4/4</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/1</span>
+                <span class='fraction'>1/1</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">18.18% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>2/11</span>
+                <span class='fraction'>11/11</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -81,40 +81,40 @@
 <a name='L16'></a><a href='#L16'>16</a>
 <a name='L17'></a><a href='#L17'>17</a>
 <a name='L18'></a><a href='#L18'>18</a>
-<a name='L19'></a><a href='#L19'>19</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">2x</span>
+<a name='L19'></a><a href='#L19'>19</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">26x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">26x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">24x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">24x</span>
+<span class="cline-any cline-yes">24x</span>
+<span class="cline-any cline-yes">22x</span>
+<span class="cline-any cline-yes">22x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const jwt = require('jsonwebtoken');
 &nbsp;
-module.exports = <span class="fstat-no" title="function not covered" >(r</span>eq, res, next) =&gt; {
-  const authHeader = <span class="cstat-no" title="statement not covered" >req.headers.authorization;</span>
+module.exports = (req, res, next) =&gt; {
+  const authHeader = req.headers.authorization;
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  if (!authHeader || !authHeader.startsWith('Bearer '))</span>
-<span class="cstat-no" title="statement not covered" >    return res.status(401).json({ message: 'Unauthorized' });</span>
+  if (!authHeader || !authHeader.startsWith('Bearer '))
+    return res.status(401).json({ message: 'Unauthorized' });
 &nbsp;
-  const token = <span class="cstat-no" title="statement not covered" >authHeader.split(' ')[1];</span>
+  const token = authHeader.split(' ')[1];
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  try {</span>
-    const decoded = <span class="cstat-no" title="statement not covered" >jwt.verify(token, process.env.JWT_SECRET);</span>
-<span class="cstat-no" title="statement not covered" >    req.user = decoded; </span>// attaches user info to request
-<span class="cstat-no" title="statement not covered" >    next();</span>
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded; // attaches user info to request
+    next();
   } catch (err) {
-<span class="cstat-no" title="statement not covered" >    res.status(401).json({ message: 'Invalid token' });</span>
+    res.status(401).json({ message: 'Invalid token' });
   }
 };
 &nbsp;</pre></td></tr></table></pre>
@@ -124,7 +124,7 @@ module.exports = <span class="fstat-no" title="function not covered" >(r</span>e
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-05-20T03:50:06.555Z
+                at 2025-05-22T21:22:42.077Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

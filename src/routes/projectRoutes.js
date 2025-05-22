@@ -11,7 +11,7 @@ router.get('/:id', controller.show);
 
 router.post('/', controller.create);
 router.put('/:id', controller.update);
-router.delete('/:id', controller.remove);
+router.delete('/:id', controller.destroy);
 
 // Test Route
 router.get('/secure/test', auth, (req, res) => {

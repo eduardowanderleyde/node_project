@@ -2,6 +2,11 @@ const express = require('express');
 const router = express.Router();
 const Project = require('../models/Project');
 const mongoose = require('mongoose');
+const projectRoutes = require('./projectRoutes');
+const skillRoutes = require('./skillRoutes');
+const authRoutes = require('./authRoutes');
+const auth = require('../middlewares/auth');
+const adminAuth = require('../middlewares/adminAuth');
 
 // Define Skill schema and model only if not already defined
 const SkillSchema = new mongoose.Schema({
@@ -20,25 +25,29 @@ router.get('/health', (req, res) => {
     res.json({ status: 'ok' });
 });
 
-// Projects route - returns all projects from the database
-router.get('/projects', async (req, res) => {
+// Auth routes (não precisam de autenticação)
+router.use('/auth', authRoutes);
+
+// Rotas protegidas que precisam de autenticação
+router.use('/projects', auth, projectRoutes);
+router.use('/skills', auth, skillRoutes);
+
+// Rotas de admin (precisam de autenticação e role admin)
+router.get('/admin/projects', auth, adminAuth, async (req, res) => {
     try {
         const projects = await Project.find();
         res.json(projects);
     } catch (error) {
-        console.error('Error fetching projects:', error);
-        res.status(500).json({ error: 'Failed to fetch projects' });
+        res.status(500).json({ error: error.message });
     }
 });
 
-// Skills route - returns all skills from the database
-router.get('/skills', async (req, res) => {
+router.get('/admin/skills', auth, adminAuth, async (req, res) => {
     try {
         const skills = await Skill.find();
         res.json(skills);
     } catch (error) {
-        console.error('Error fetching skills:', error);
-        res.status(500).json({ error: 'Failed to fetch skills' });
+        res.status(500).json({ error: error.message });
     }
 });
 

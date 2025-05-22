@@ -1,23 +1,21 @@
-// src/controllers/projectController.js
+const Skill = require('../models/Skill');
 
-const Project = require('../models/Project');
-
-// List all projects
+// List all skills
 exports.index = async (req, res) => {
   try {
-    const projects = await Project.find();
-    res.json(projects);
+    const skills = await Skill.find();
+    res.json(skills);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-// Create a new project
+// Create a new skill
 exports.create = async (req, res) => {
   try {
-    const project = new Project(req.body);
-    await project.save();
-    res.status(201).json(project);
+    const skill = new Skill(req.body);
+    await skill.save();
+    res.status(201).json(skill);
   } catch (error) {
     if (error.name === 'ValidationError') {
       return res.status(400).json({ error: error.message });
@@ -26,12 +24,12 @@ exports.create = async (req, res) => {
   }
 };
 
-// Get a single project by ID
+// Get a single skill by ID
 exports.show = async (req, res) => {
   try {
-    const project = await Project.findById(req.params.id);
-    if (!project) return res.status(404).json({ error: 'Not found' });
-    res.json(project);
+    const skill = await Skill.findById(req.params.id);
+    if (!skill) return res.status(404).json({ error: 'Not found' });
+    res.json(skill);
   } catch (error) {
     if (error.name === 'CastError') {
       return res.status(400).json({ error: 'Invalid ID format' });
@@ -40,16 +38,16 @@ exports.show = async (req, res) => {
   }
 };
 
-// Update a project
+// Update a skill
 exports.update = async (req, res) => {
   try {
-    const project = await Project.findByIdAndUpdate(
+    const skill = await Skill.findByIdAndUpdate(
       req.params.id,
       req.body,
       { new: true, runValidators: true }
     );
-    if (!project) return res.status(404).json({ error: 'Not found' });
-    res.json(project);
+    if (!skill) return res.status(404).json({ error: 'Not found' });
+    res.json(skill);
   } catch (error) {
     if (error.name === 'CastError') {
       return res.status(400).json({ error: 'Invalid ID format' });
@@ -61,16 +59,16 @@ exports.update = async (req, res) => {
   }
 };
 
-// Delete a project
+// Delete a skill
 exports.destroy = async (req, res) => {
   try {
-    const project = await Project.findByIdAndDelete(req.params.id);
-    if (!project) return res.status(404).json({ error: 'Not found' });
-    res.status(200).json({ message: 'Project deleted successfully' });
+    const skill = await Skill.findByIdAndDelete(req.params.id);
+    if (!skill) return res.status(404).json({ error: 'Not found' });
+    res.status(200).json({ message: 'Skill deleted successfully' });
   } catch (error) {
     if (error.name === 'CastError') {
       return res.status(400).json({ error: 'Invalid ID format' });
     }
     res.status(500).json({ error: error.message });
   }
-};
+}; 
