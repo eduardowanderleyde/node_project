@@ -51,4 +51,9 @@ const ProjectSchema = new mongoose.Schema({
   }
 });
 
+// Adicionar validação customizada para garantir que technologies seja um array de strings
+ProjectSchema.path('technologies').validate(function(technologies) {
+  return Array.isArray(technologies) && technologies.every(tech => typeof tech === 'string');
+}, 'Technologies must be an array of strings');
+
 module.exports = mongoose.model('Project', ProjectSchema);

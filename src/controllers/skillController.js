@@ -41,19 +41,34 @@ exports.show = async (req, res) => {
 // Update a skill
 exports.update = async (req, res) => {
   try {
+    const { id } = req.params;
+    const updates = req.body;
+
+    // Validar tipos de dados
+    if (updates.name && typeof updates.name !== 'string') {
+      return res.status(400).json({ error: 'Name must be a string' });
+    }
+    if (updates.level && typeof updates.level !== 'string') {
+      return res.status(400).json({ error: 'Level must be a string' });
+    }
+    if (updates.category && typeof updates.category !== 'string') {
+      return res.status(400).json({ error: 'Category must be a string' });
+    }
+
     const skill = await Skill.findByIdAndUpdate(
-      req.params.id,
-      req.body,
+      id,
+      updates,
       { new: true, runValidators: true }
     );
-    if (!skill) return res.status(404).json({ error: 'Not found' });
+
+    if (!skill) {
+      return res.status(404).json({ error: 'Not found' });
+    }
+
     res.json(skill);
   } catch (error) {
     if (error.name === 'CastError') {
       return res.status(400).json({ error: 'Invalid ID format' });
-    }
-    if (error.name === 'ValidationError') {
-      return res.status(400).json({ error: error.message });
     }
     res.status(500).json({ error: error.message });
   }

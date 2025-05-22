@@ -91,7 +91,7 @@ describe('API de Portfólio', () => {
         .send({
           title: 123, // título deve ser string
           description: true, // descrição deve ser string
-          technologies: 'não é um array' // technologies deve ser array
+          technologies: [{ invalid: 'object' }] // technologies deve ser um array de strings
         });
       
       expect(res.status).toBe(400);
@@ -154,6 +154,123 @@ describe('API de Portfólio', () => {
       
       const projetoDeletado = await Project.findById(projeto._id);
       expect(projetoDeletado).toBeNull();
+    });
+
+    // Novos testes para cobrir mais casos
+    it('deve retornar erro 500 ao ocorrer erro interno no servidor', async () => {
+      // Mock do Project.find() para lançar um erro
+      jest.spyOn(Project, 'find').mockImplementationOnce(() => {
+        throw new Error('Erro interno');
+      });
+
+      const res = await request(app)
+        .get('/api/projects')
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(res.status).toBe(500);
+      expect(res.body).toHaveProperty('error');
+      expect(res.body.error).toBe('Erro interno');
+
+      // Restaurar o mock
+      jest.restoreAllMocks();
+    });
+
+    it('deve retornar erro 400 ao tentar atualizar com dados inválidos', async () => {
+      const projeto = await Project.create(projetoTeste);
+      
+      const res = await request(app)
+        .put(`/api/projects/${projeto._id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ title: 123 }); // title deve ser string
+
+      expect(res.status).toBe(400);
+      expect(res.body).toHaveProperty('error');
+    });
+
+    it('deve retornar erro 400 ao tentar criar com ID inválido', async () => {
+      const res = await request(app)
+        .get('/api/projects/id-invalido')
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(res.status).toBe(400);
+      expect(res.body).toHaveProperty('error', 'Invalid ID format');
+    });
+
+    it('deve retornar erro 500 ao ocorrer erro ao deletar', async () => {
+      const projeto = await Project.create(projetoTeste);
+      
+      // Mock do findByIdAndDelete para lançar um erro
+      jest.spyOn(Project, 'findByIdAndDelete').mockImplementationOnce(() => {
+        throw new Error('Erro ao deletar');
+      });
+
+      const res = await request(app)
+        .delete(`/api/projects/${projeto._id}`)
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(res.status).toBe(500);
+      expect(res.body).toHaveProperty('error');
+      expect(res.body.error).toBe('Erro ao deletar');
+
+      // Restaurar o mock
+      jest.restoreAllMocks();
+    });
+
+    it('deve retornar erro 400 ao tentar atualizar projeto com ID inválido', async () => {
+      const res = await request(app)
+        .put('/api/projects/id-invalido')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ title: 'Novo Título' });
+      expect(res.status).toBe(400);
+      expect(res.body).toHaveProperty('error', 'Invalid ID format');
+    });
+
+    it('deve retornar erro 400 ao tentar deletar projeto com ID inválido', async () => {
+      const res = await request(app)
+        .delete('/api/projects/id-invalido')
+        .set('Authorization', `Bearer ${token}`);
+      expect(res.status).toBe(400);
+      expect(res.body).toHaveProperty('error', 'Invalid ID format');
+    });
+
+    it('deve retornar erro 500 ao ocorrer erro ao criar', async () => {
+      // Mock do Project.save() para lançar um erro
+      jest.spyOn(Project.prototype, 'save').mockImplementationOnce(() => {
+        throw new Error('Erro ao criar');
+      });
+
+      const res = await request(app)
+        .post('/api/projects')
+        .set('Authorization', `Bearer ${token}`)
+        .send(projetoTeste);
+
+      expect(res.status).toBe(500);
+      expect(res.body).toHaveProperty('error');
+      expect(res.body.error).toBe('Erro ao criar');
+
+      // Restaurar o mock
+      jest.restoreAllMocks();
+    });
+
+    it('deve retornar erro 500 ao ocorrer erro ao atualizar', async () => {
+      const projeto = await Project.create(projetoTeste);
+      
+      // Mock do findByIdAndUpdate para lançar um erro
+      jest.spyOn(Project, 'findByIdAndUpdate').mockImplementationOnce(() => {
+        throw new Error('Erro ao atualizar');
+      });
+
+      const res = await request(app)
+        .put(`/api/projects/${projeto._id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ title: 'Novo Título' });
+
+      expect(res.status).toBe(500);
+      expect(res.body).toHaveProperty('error');
+      expect(res.body.error).toBe('Erro ao atualizar');
+
+      // Restaurar o mock
+      jest.restoreAllMocks();
     });
   });
 
@@ -267,6 +384,83 @@ describe('API de Portfólio', () => {
       
       const habilidadeDeletada = await Skill.findById(habilidade._id);
       expect(habilidadeDeletada).toBeNull();
+    });
+
+    // Novos testes para cobrir mais casos
+    it('deve retornar erro 500 ao ocorrer erro interno no servidor', async () => {
+      // Mock do Skill.find() para lançar um erro
+      jest.spyOn(Skill, 'find').mockImplementationOnce(() => {
+        throw new Error('Erro interno');
+      });
+
+      const res = await request(app)
+        .get('/api/skills')
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(res.status).toBe(500);
+      expect(res.body).toHaveProperty('error');
+      expect(res.body.error).toBe('Erro interno');
+
+      // Restaurar o mock
+      jest.restoreAllMocks();
+    });
+
+    it('deve retornar erro 400 ao tentar atualizar com dados inválidos', async () => {
+      const habilidade = await Skill.create(habilidadeTeste);
+      
+      const res = await request(app)
+        .put(`/api/skills/${habilidade._id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 123 }); // name deve ser string
+
+      expect(res.status).toBe(400);
+      expect(res.body).toHaveProperty('error');
+    });
+
+    it('deve retornar erro 400 ao tentar criar com ID inválido', async () => {
+      const res = await request(app)
+        .get('/api/skills/id-invalido')
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(res.status).toBe(400);
+      expect(res.body).toHaveProperty('error', 'Invalid ID format');
+    });
+
+    it('deve retornar erro 500 ao ocorrer erro ao deletar', async () => {
+      const habilidade = await Skill.create(habilidadeTeste);
+      
+      // Mock do findByIdAndDelete para lançar um erro
+      jest.spyOn(Skill, 'findByIdAndDelete').mockImplementationOnce(() => {
+        throw new Error('Erro ao deletar');
+      });
+
+      const res = await request(app)
+        .delete(`/api/skills/${habilidade._id}`)
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(res.status).toBe(500);
+      expect(res.body).toHaveProperty('error');
+      expect(res.body.error).toBe('Erro ao deletar');
+
+      // Restaurar o mock
+      jest.restoreAllMocks();
+    });
+
+    it('deve retornar erro 400 ao tentar atualizar habilidade com ID inválido', async () => {
+      const res = await request(app)
+        .put('/api/skills/id-invalido')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Novo Nome' });
+      expect(res.status).toBe(400);
+      expect(res.body).toHaveProperty('error', 'Invalid ID format');
+    });
+
+    it('deve retornar erro 400 ao tentar deletar habilidade com ID inválido', async () => {
+      const res = await request(app)
+        .delete('/api/skills/id-invalido')
+        .set('Authorization', `Bearer ${token}`);
+      expect(res.status).toBe(400);
+      expect(res.body).toHaveProperty('error', 'Invalid ID format');
     });
   });
 

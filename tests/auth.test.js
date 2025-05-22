@@ -3,6 +3,10 @@ const mongoose = require('mongoose');
 const app = require('../src/app');
 const User = require('../src/models/User');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+
+// Define JWT_SECRET para os testes
+process.env.JWT_SECRET = 'test-secret';
 
 describe('Autenticação', () => {
   const userTest = {
@@ -10,11 +14,11 @@ describe('Autenticação', () => {
     password: 'password123'
   };
 
-  beforeEach(async () => {
-    await User.deleteMany({});
-  });
-
   describe('Registro', () => {
+    beforeEach(async () => {
+      await User.deleteMany({});
+    });
+
     it('deve registrar um novo usuário', async () => {
       const res = await request(app)
         .post('/api/auth/register')
@@ -27,7 +31,7 @@ describe('Autenticação', () => {
     it('deve retornar erro ao registrar email duplicado', async () => {
       await User.create({
         email: userTest.email,
-        password: 'hashedpassword'
+        password: await bcrypt.hash(userTest.password, 10)
       });
 
       const res = await request(app)
@@ -41,15 +45,23 @@ describe('Autenticação', () => {
 
   describe('Login', () => {
     beforeEach(async () => {
-      await request(app)
-        .post('/api/auth/register')
-        .send(userTest);
+      await User.deleteMany({});
+      // Cria um usuário com senha hasheada
+      const hashedPassword = await bcrypt.hash(userTest.password, 10);
+      await User.create({
+        email: userTest.email,
+        password: hashedPassword,
+        role: 'user'
+      });
     });
 
     it('deve fazer login com credenciais válidas', async () => {
       const res = await request(app)
         .post('/api/auth/login')
-        .send(userTest);
+        .send({
+          email: userTest.email,
+          password: userTest.password
+        });
 
       expect(res.status).toBe(200);
       expect(res.body).toHaveProperty('token');
