@@ -26,14 +26,15 @@ describe('Redis Configuration', () => {
     process.env.REDIS_URL = originalUrl;
   });
 
-  it('deve lidar com eventos de erro', () => {
-    const errorHandler = jest.fn();
-    redisClient.on('error', errorHandler);
-    
+  it('deve lidar com eventos de erro', async () => {
     redisClient.emit('error', new Error('Test error'));
-    expect(errorHandler).toHaveBeenCalled();
-    expect(redisClient.isOpen).toBe(false); // Verificando se a conexão foi fechada após erro
+  
+    await new Promise((res) => setTimeout(res, 50));
+  
+    expect(redisClient.isOpen).toBe(false);
   });
+  
+  
 
   it('deve lidar com eventos de conexão', () => {
     const connectHandler = jest.fn();

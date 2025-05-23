@@ -9,11 +9,15 @@ let token;
 
 // Função auxiliar para registrar e logar um usuário de teste
 async function getToken() {
-  const user = { email: 'apitest@example.com', password: 'senha123' };
+  const user = { name: 'Usuário Teste', email: 'apitest@example.com', password: 'senha123' };
   await request(app).post('/api/auth/register').send(user);
-  const res = await request(app).post('/api/auth/login').send(user);
+  const res = await request(app).post('/api/auth/login').send({
+    email: user.email,
+    password: user.password,
+  });
   return res.body.token;
 }
+
 
 beforeAll(async () => {
   try {
