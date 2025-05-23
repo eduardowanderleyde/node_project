@@ -30,16 +30,18 @@ exports.register = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    // Verifica se o usuário já existe
     const existingUser = await User.findOne({ email });
-    if (existingUser)
+    if (existingUser) {
       return res.status(400).json({ message: 'Email already registered' });
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await User.create({
       email,
       password: hashedPassword,
-      role: 'user' // Definindo role padrão
+      role: 'user'
     });
 
     const token = jwt.sign(

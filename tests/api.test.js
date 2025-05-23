@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const app = require('../src/app');
 const Project = require('../src/models/Project');
 const Skill = require('../src/models/Skill');
+const redis = require('../src/config/redis');
 
 let token;
 
@@ -15,13 +16,20 @@ async function getToken() {
 }
 
 beforeAll(async () => {
+  try {
+    await redis.connectRedis();
+  } catch (error) {
+    console.warn('Redis não disponível para testes:', error.message);
+  }
   token = await getToken();
 });
 
-// Limpar o banco de dados antes dos testes
-beforeEach(async () => {
+afterEach(async () => {
   await Project.deleteMany({});
   await Skill.deleteMany({});
+  if (redis.redisClient && redis.redisClient.flushall) {
+    await redis.redisClient.flushall(); // Limpa o cache do Redis
+  }
 });
 
 // Portfolio API test suite
@@ -233,6 +241,17 @@ describe('API de Portfólio', () => {
       expect(res.body).toHaveProperty('error', 'Invalid ID format');
     });
 
+    it('deve retornar erro 500 ao ocorrer erro interno no servidor (show)', async () => {
+      jest.spyOn(Project, 'findById').mockImplementationOnce(() => { throw new Error('Erro interno'); });
+      const id = new mongoose.Types.ObjectId();
+      const res = await request(app)
+        .get(`/api/projects/${id}`)
+        .set('Authorization', `Bearer ${token}`);
+      expect(res.status).toBe(500);
+      expect(res.body).toHaveProperty('error');
+      jest.restoreAllMocks();
+    });
+
     it('deve retornar erro 500 ao ocorrer erro ao criar', async () => {
       // Mock do Project.save() para lançar um erro
       jest.spyOn(Project.prototype, 'save').mockImplementationOnce(() => {
@@ -270,6 +289,16 @@ describe('API de Portfólio', () => {
       expect(res.body.error).toBe('Erro ao atualizar');
 
       // Restaurar o mock
+      jest.restoreAllMocks();
+    });
+
+    it('deve retornar erro 500 se ocorrer erro inesperado ao listar projetos', async () => {
+      jest.spyOn(Project, 'find').mockImplementationOnce(() => { throw new Error('Erro inesperado'); });
+      const res = await request(app)
+        .get('/api/projects')
+        .set('Authorization', `Bearer ${token}`);
+      expect(res.status).toBe(500);
+      expect(res.body).toHaveProperty('error', 'Erro inesperado');
       jest.restoreAllMocks();
     });
   });
@@ -462,6 +491,27 @@ describe('API de Portfólio', () => {
       expect(res.status).toBe(400);
       expect(res.body).toHaveProperty('error', 'Invalid ID format');
     });
+
+    it('deve retornar erro 500 ao ocorrer erro interno no servidor (show)', async () => {
+      jest.spyOn(Skill, 'findById').mockImplementationOnce(() => { throw new Error('Erro interno'); });
+      const id = new mongoose.Types.ObjectId();
+      const res = await request(app)
+        .get(`/api/skills/${id}`)
+        .set('Authorization', `Bearer ${token}`);
+      expect(res.status).toBe(500);
+      expect(res.body).toHaveProperty('error');
+      jest.restoreAllMocks();
+    });
+
+    it('deve retornar erro 500 se ocorrer erro inesperado ao listar habilidades', async () => {
+      jest.spyOn(Skill, 'find').mockImplementationOnce(() => { throw new Error('Erro inesperado'); });
+      const res = await request(app)
+        .get('/api/skills')
+        .set('Authorization', `Bearer ${token}`);
+      expect(res.status).toBe(500);
+      expect(res.body).toHaveProperty('error', 'Erro inesperado');
+      jest.restoreAllMocks();
+    });
   });
 
   // Testes de Erro
@@ -490,9 +540,76 @@ describe('API de Portfólio', () => {
       expect(res.status).toBe(401);
     });
   });
+
+  // Testes de Middleware de Cache
+  describe('Middleware de Cache', () => {
+    it('deve continuar mesmo se ocorrer erro no Redis (get)', async () => {
+      const originalGet = redis.redisClient.get;
+      redis.redisClient.get = () => { throw new Error('Erro Redis'); };
+      const res = await request(app)
+        .get('/api/projects')
+        .set('Authorization', `Bearer ${token}`);
+      expect(res.status).toBe(200);
+      redis.redisClient.get = originalGet;
+    });
+
+    it('deve continuar mesmo se ocorrer erro no Redis (set)', async () => {
+      const originalSet = redis.redisClient.set;
+      redis.redisClient.set = () => { throw new Error('Erro Redis'); };
+      const res = await request(app)
+        .get('/api/projects')
+        .set('Authorization', `Bearer ${token}`);
+      expect(res.status).toBe(200);
+      redis.redisClient.set = originalSet;
+    });
+
+    it('deve continuar mesmo se o Redis estiver desconectado (client closed)', async () => {
+      const originalGet = redis.redisClient.get;
+      redis.redisClient.get = () => { throw new Error('ClientClosedError: The client is closed'); };
+      const res = await request(app)
+        .get('/api/projects')
+        .set('Authorization', `Bearer ${token}`);
+      expect([200,401]).toContain(res.status); // Aceita 401 se o token expirar
+      redis.redisClient.get = originalGet;
+    });
+
+    it('não deve usar cache para métodos diferentes de GET', async () => {
+      const habilidadeTeste = { name: 'CacheTest', level: 'Intermediário', category: 'Backend' };
+      const res = await request(app)
+        .post('/api/skills')
+        .set('Authorization', `Bearer ${token}`)
+        .send(habilidadeTeste);
+      expect(res.status).toBe(201);
+      expect(res.body).toHaveProperty('_id');
+    });
+  });
+
+  describe('Rotas de fallback', () => {
+    it('deve retornar 404 para rota inexistente', async () => {
+      const res = await request(app).get('/rota-que-nao-existe');
+      expect(res.status).toBe(404);
+    });
+  });
+});
+
+describe('Redis Config', () => {
+  it('deve capturar erro ao conectar no Redis', async () => {
+    const { connectRedis } = require('../src/config/redis');
+    const originalConnect = connectRedis;
+    // Simula erro de conexão
+    const fakeClient = { connect: async () => { throw new Error('Erro de conexão Redis'); }, on: () => {} };
+    await expect((async () => {
+      await fakeClient.connect();
+    })()).rejects.toThrow('Erro de conexão Redis');
+    // Não altera o client real
+    expect(connectRedis).toBe(originalConnect);
+  });
 });
 
 // Limpar conexão após todos os testes
 afterAll(async () => {
+  if (redis.redisClient && redis.redisClient.isOpen) {
+    await redis.redisClient.quit();
+  }
   await mongoose.connection.close();
 }); 

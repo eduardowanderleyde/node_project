@@ -29,17 +29,18 @@ describe('Autenticação', () => {
     });
 
     it('deve retornar erro ao registrar email duplicado', async () => {
-      await User.create({
-        email: userTest.email,
-        password: await bcrypt.hash(userTest.password, 10)
-      });
+      // Primeiro registro
+      await request(app)
+        .post('/api/auth/register')
+        .send(userTest);
 
+      // Tentativa de registro com mesmo email
       const res = await request(app)
         .post('/api/auth/register')
         .send(userTest);
 
       expect(res.status).toBe(400);
-      expect(res.body.message).toBe('Email already registered');
+      expect(res.body).toHaveProperty('message', 'Email already registered');
     });
   });
 
@@ -56,6 +57,12 @@ describe('Autenticação', () => {
     });
 
     it('deve fazer login com credenciais válidas', async () => {
+      // Primeiro registra o usuário
+      await request(app)
+        .post('/api/auth/register')
+        .send(userTest);
+
+      // Tenta fazer login
       const res = await request(app)
         .post('/api/auth/login')
         .send({

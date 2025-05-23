@@ -44,7 +44,7 @@ exports.update = async (req, res) => {
     const { id } = req.params;
     const updates = req.body;
 
-    // Validar tipos de dados
+    // Validate data types
     if (updates.name && typeof updates.name !== 'string') {
       return res.status(400).json({ error: 'Name must be a string' });
     }
@@ -86,4 +86,4 @@ exports.destroy = async (req, res) => {
     }
     res.status(500).json({ error: error.message });
   }
-}; 
+};

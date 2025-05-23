@@ -1,9 +1,14 @@
-const { redisClient } = require('../config/redis');
+const { redisClient, isConnected } = require('../config/redis');
 
 const cacheMiddleware = (duration) => {
   return async (req, res, next) => {
-    // Don't use cache for methods that modify data
+    // Skip cache for non-GET methods
     if (req.method !== 'GET') {
+      return next();
+    }
+
+    // If Redis is not connected or not open, skip cache
+    if (!isConnected || !redisClient.isOpen) {
       return next();
     }
 
@@ -11,26 +16,34 @@ const cacheMiddleware = (duration) => {
 
     try {
       const cachedResponse = await redisClient.get(key);
-
+    
       if (cachedResponse) {
-        return res.json(JSON.parse(cachedResponse));
+        try {
+          return res.json(JSON.parse(cachedResponse));
+        } catch (parseError) {
+          console.error('Erro ao fazer parse do cache:', parseError);
+        }
       }
-
-      // Intercept original response
+    
+      // Intercepta a resposta original
       const originalJson = res.json;
       res.json = function (body) {
-        // Store in cache
-        redisClient.setEx(key, duration, JSON.stringify(body));
-        // Restore original method
+        try {
+          redisClient.setEx(key, duration, JSON.stringify(body));
+        } catch (error) {
+          console.error('Erro ao armazenar no cache:', error);
+        }
+    
         return originalJson.call(this, body);
       };
-
+    
       next();
     } catch (error) {
-      console.error('Cache error:', error);
+      console.error('Erro no cache:', error);
       next();
     }
+    
   };
 };
 
-module.exports = cacheMiddleware; 
+module.exports = cacheMiddleware;
